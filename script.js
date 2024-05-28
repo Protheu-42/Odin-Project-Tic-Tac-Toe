@@ -38,7 +38,7 @@ function GameBoard() {
      const checkRowWinner = function (position, mark) {
         const cell = getBoardPosition(position);
         let isWinner = true;
-        board[cell.row].forEach(item => item === mark ? isWinner = true : isWinner = false);
+        board[cell.row].forEach(item => item === mark ? isWinner = true : isWinner = false); // Change to the other way around
         return isWinner;
     }
 
