@@ -1,12 +1,11 @@
 function GameBoard() {
-    // let cell = Mark();
     let board = [];
     const boardSize = 3;
 
     for (let i = 0; i < boardSize; i++) {
         board[i] = [];
         for (let j = 0; j < boardSize; j++) {
-            board[i].push(`${i}${j}`);
+            board[i].push(`0`);
         }
     };
 
@@ -21,9 +20,21 @@ function GameBoard() {
         };
     }
 
+    const isBoardFull = function () {
+        let isFull = true;
+        board.forEach(row => {
+            row.forEach(cell => {
+                if (cell === "0"){
+                    isFull = false;
+                }
+            })
+        })
+        return isFull;
+    }
+
     const checkAvailable = function (move) {
         const cell = getBoardPosition(move);
-        if (board[cell.row][cell.col] === `${cell.row}${cell.col}`){
+        if (board[cell.row][cell.col] === `0`){
             return true;
         } else {
             return false;
@@ -38,16 +49,26 @@ function GameBoard() {
      const checkRowWinner = function (position, mark) {
         const cell = getBoardPosition(position);
         let isWinner = true;
-        board[cell.row].forEach(item => item === mark ? isWinner = true : isWinner = false); // Change to the other way around
+        board[cell.row].forEach(item => {
+            if (item != mark) {
+                isWinner = false;
+                return false;
+            }
+        });
         return isWinner;
     }
 
     const checkColWinner = function (position, mark) {
         const cell = getBoardPosition(position);
-        arrCol = [];
-        let isWinner = false;
+        let arrCol = [];
+        let isWinner = true;
         board.forEach(row => arrCol.push(row[cell.col]));
-        arrCol.forEach(item => item === mark ? isWinner = true : isWinner = false);
+        arrCol.forEach(item => {
+            if (item != mark) {
+                isWinner = false;
+                return false;
+            }
+        });
         return isWinner;
     }
 
@@ -55,20 +76,22 @@ function GameBoard() {
         let isWinner = false;
         if (board[0][0] === mark && board[1][1] === mark && board[2][2] === mark)  {
             isWinner = true;
+            return true;
         } else if (board[0][2] === mark && board[1][1] === mark && board[2][0] === mark) {
             isWinner = true;
+            return true;
         }
         return isWinner;
     }
 
     return {
-        board,
         getBoard,
         checkAvailable,
         putMark,
         checkRowWinner,
         checkColWinner,
-        checkDiagonalWinner
+        checkDiagonalWinner,
+        isBoardFull
     };
 };
 
@@ -97,18 +120,25 @@ function GameController() {
     };
 
     const startNewRound = function () {
-        board.getBoard();
         console.log(`It's ${activePlayer.name} turn`);
         playRound();
     }
 
     const playRound = function () {
-        let move = prompt(`${activePlayer.name}, What cell you choose?`);
-        board.checkAvailable(move); // Assume Fair Play for now
-        board.putMark(move, activePlayer.token);
+        let move;
         board.getBoard();
+        do {
+            move = prompt(`${activePlayer.name}, What cell you choose?`);
+        } while (board.checkAvailable(move) === false); // Make sure not to overlap marks
+        board.putMark(move, activePlayer.token);
         if (victory(move, activePlayer.token) === true) {
+            board.getBoard();
             gameOver(activePlayer);
+            return false;
+        }
+        if (checkTie() === true) {
+            board.getBoard();
+            console.log("Is a Tie!");
             return false;
         }
         changeActive();
@@ -119,15 +149,23 @@ function GameController() {
         let isWinner = false;
         if (board.checkRowWinner(position, mark) === true) {
             isWinner = true;
-            console.log("Guilty Row");
+            console.log("Row Guilty")
         } else if (board.checkColWinner(position, mark) === true) {
             isWinner = true;
-            console.log("Guilty Col");
+            console.log("Col Guilty")
         } else if (board.checkDiagonalWinner(mark) === true ) {
             isWinner = true;
-            console.log("Guilty Diag");
+            console.log("Diag Guilty")
         };
         return isWinner;
+    }
+
+    const checkTie = function () {
+        let isATie = false;
+        if (board.isBoardFull() === true) {
+            isATie = true;
+        }
+        return isATie;
     }
 
     const gameOver = function (player) {
@@ -140,24 +178,3 @@ function GameController() {
 };
 
 GameController();
-
-// function test() {
-//     const board = GameBoard().board; // CHANGE THIS ALSO, NO VARIABLE CAN DIRECT ACCESS
-//     const col = 1;
-//     function check() { 
-//         let isWinner = false;
-//         board.forEach(row => {
-//             console.log(row[col])
-//             if (row[col] === "11"){
-//                 isWinner = true;
-//             }
-//         });
-//         return isWinner;
-//     };
-
-//     if (check() === true) {
-//         console.log("true")
-//     };
-// }
-
-// test();
