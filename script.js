@@ -108,16 +108,22 @@ function GameController() {
     const startBtn = document.querySelector(".start-button");
     const messageBoard = document.querySelector(".message-board");
     const changeNameBtnOne = document.querySelector("#playerOneChangeBtn");
+    const changeNameBtnTwo = document.querySelector("#playerTwoChangeBtn");
     const playerOneChangedName = document.querySelector("#playerOneName");
+    const playerTwoChangedName = document.querySelector("#playerTwoName");
+    const playerOneScore = document.querySelector("#playerOneScore");
+    const playerTwoScore = document.querySelector("#playerTwoScore");
     
     const player = [
         {
             name: "Player One",
-            token: "X"
+            token: "X",
+            score: 0
         },
         {
             name: "Player Two",
-            token: "O"
+            token: "O",
+            score: 0
         }
     ];
 
@@ -147,6 +153,7 @@ function GameController() {
         if (victory(move, activePlayer.token) === true) {
             renderBoard()
             gameOver(activePlayer);
+            updateScore(activePlayer);
             return false;
         }
         if (checkTie() === true) {
@@ -184,12 +191,10 @@ function GameController() {
     const gameOver = function (playerOrTie) {
         if (playerOrTie === "tie") {
             renderMessage(`It's a Tie!`);
-            removeBoardInteraction();
-            return false;
+            setTimeout(() => {startFreshRound()}, 1000);
         } else {
-            renderMessage(`Congratulations ${playerOrTie.name}, you win!`)
-            removeBoardInteraction();
-            return false;
+            renderMessage(`Congratulations ${playerOrTie.name}, you win!`);
+            setTimeout(() => {startFreshRound()}, 1000);
         }
     };
 
@@ -212,36 +217,46 @@ function GameController() {
         }
     };
 
-    const renderNonInteractableBoard = function () {
-        while (boardContainer.firstChild) {
-            boardContainer.removeChild(boardContainer.firstChild);
-        };
-        for (let i = 0; i < 3; i++){
-            for (let j = 0; j < 3; j++){
-                const cell = document.createElement("button");
-                cell.textContent = board.getBoard()[i][j];
-                cell.id = `${i}${j}`
-                boardContainer.appendChild(cell);            
-            }
-        }
-        
-    }
-
     const renderMessage = (message) => messageBoard.textContent = `${message}`;
 
-    startBtn.addEventListener("click", () => {
+    const startFreshRound = function () {
         board.generateEmptyBoard();
         startNewRound();
+    }
+
+    startBtn.addEventListener("click", () => {
+        startFreshRound()
         startBtn.textContent = "Restart"
     })
 
-    const removeBoardInteraction = function () {
-        renderNonInteractableBoard();
-        boardContainer.classList.add("blur");
+    // CHANGE NAME AND SCORE INTERACTION / DISPLAY
+    changeNameBtnOne.addEventListener("click", () => {
+        if (activePlayer === player[0]) {
+            player[0].name = playerOneChangedName.value;
+            renderMessage(`It's ${activePlayer.name} turn`);        
+        }
+        player[0].name = playerOneChangedName.value;
+    })
+
+    changeNameBtnTwo.addEventListener("click", () => {
+        if (activePlayer === player[1]) {
+            player[1].name = playerTwoChangedName.value;
+            renderMessage(`It's ${activePlayer.name} turn`);        
+        }
+        player[1].name = playerTwoChangedName.value;
+    })
+
+    playerOneScore.textContent = player[0].score;
+    playerTwoScore.textContent = player[1].score;
+
+    const updateScore = function (playerThatScored) {
+        playerThatScored.score++;
+        if (playerThatScored === player[0]) {
+            playerOneScore.textContent = player[0].score;
+        } else {
+            playerTwoScore.textContent = player[1].score;
+        }
     }
-
-    // CHANGE NAME INTERACTION
-
 };
 
 GameController()
