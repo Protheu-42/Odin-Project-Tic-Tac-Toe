@@ -1,14 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+
 * {
     padding: 0;
     margin: 0;
+    
+    --primary-color: #BDE4A7;
+    --secondary-color: #006992;
 }
 
 body {
     height: 100vh;
-}
-
-.blur {
-    filter: blur(2px);
+    font-family: "Roboto", sans-serif;
 }
 
 .main-container {
@@ -16,6 +18,25 @@ body {
     grid-template-columns: 1fr 2fr 1fr;
     padding: 35px;
     gap: 10px;
+    height: 100%;
+    background-color: var(--secondary-color);
+}
+
+.main-container > div {
+    background-color: var(--primary-color);
+    padding: 25px;
+}
+
+.main-container > :first-child {
+    justify-self: end;
+}
+
+.main-container > :first-child > button {
+    margin-bottom: 15px;
+}
+
+.main-container > :last-child > button {
+    margin-bottom: 15px;
 }
 
 button:hover,
@@ -28,15 +49,17 @@ input[type="text"] {
     font: inherit;
     font-size: inherit;
     margin-bottom: 5px;
+    padding: 5px;
 }
 
-.main-container > :first-child {
-    justify-self: end;
+input[type="text"] + button {
+    padding: 5px;
 }
 
 .game-center {
     display: grid;
     text-align: center;
+    grid-template-rows: 0.5fr 1fr 1fr;
     gap: 25px;
 }
 
@@ -50,14 +73,15 @@ input[type="text"] {
     width: 80%;
     margin: auto;
     padding: 5px;
+    background-color: white;
 }
 
 .game-board {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(3, 50px);
+    grid-template-rows: repeat(3, 1fr);
     gap: 2px;
-    background-color: black;
+    background-color: var(--secondary-color);
 }
 
 .game-board button {
