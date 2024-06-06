@@ -7,6 +7,10 @@ body {
     height: 100vh;
 }
 
+.blur {
+    filter: blur(2px);
+}
+
 .main-container {
     display: grid;
     grid-template-columns: 1fr 2fr 1fr;

@@ -2,14 +2,18 @@ function GameBoard() {
     let board = [];
     const boardSize = 3;
 
-    for (let i = 0; i < boardSize; i++) {
-        board[i] = [];
-        for (let j = 0; j < boardSize; j++) {
-            board[i].push(`0`);
+    const generateEmptyBoard = function () {
+        for (let i = 0; i < boardSize; i++) {
+            board[i] = [];
+            for (let j = 0; j < boardSize; j++) {
+                board[i].push(" ");
+            }
         }
-    };
+    }; 
 
-    const getBoard = () => console.table(board); // CHANGE THIS CONSOLE LOG LATER
+    generateEmptyBoard();
+
+    const getBoard = () => board;
 
     const getBoardPosition = function (cell) {
         const row = cell.charAt(0);
@@ -24,7 +28,7 @@ function GameBoard() {
         let isFull = true;
         board.forEach(row => {
             row.forEach(cell => {
-                if (cell === "0"){
+                if (cell === " "){
                     isFull = false;
                 }
             })
@@ -34,11 +38,13 @@ function GameBoard() {
 
     const checkAvailable = function (move) {
         const cell = getBoardPosition(move);
-        if (board[cell.row][cell.col] === `0`){
-            return true;
+        let isAvailable = false;
+        if (board[cell.row][cell.col] === ` `){
+            isAvailable = true;
         } else {
-            return false;
+            isAvailable = false;
         }
+        return isAvailable;
     };
 
     const putMark = function (position, mark) {
@@ -85,6 +91,7 @@ function GameBoard() {
     }
 
     return {
+        generateEmptyBoard,
         getBoard,
         checkAvailable,
         putMark,
@@ -95,9 +102,14 @@ function GameBoard() {
     };
 };
 
-
 function GameController() {
     const board = GameBoard();
+    const boardContainer = document.querySelector(".game-board");
+    const startBtn = document.querySelector(".start-button");
+    const messageBoard = document.querySelector(".message-board");
+    const changeNameBtnOne = document.querySelector("#playerOneChangeBtn");
+    const playerOneChangedName = document.querySelector("#playerOneName");
+    
     const player = [
         {
             name: "Player One",
@@ -120,25 +132,26 @@ function GameController() {
     };
 
     const startNewRound = function () {
-        console.log(`It's ${activePlayer.name} turn`);
-        playRound();
-    }
+        renderMessage(`It's ${activePlayer.name} turn`);
+        renderBoard();
+    };
 
-    const playRound = function () {
-        let move;
-        board.getBoard();
-        do {
-            move = prompt(`${activePlayer.name}, What cell you choose?`);
-        } while (board.checkAvailable(move) === false); // Make sure not to overlap marks
+    const playRound = function (position) { 
+        let move = position;
+        if (board.checkAvailable(move) === false) {
+            renderMessage("Choose a free cell please");
+            return false;
+        }
         board.putMark(move, activePlayer.token);
+        renderBoard()
         if (victory(move, activePlayer.token) === true) {
-            board.getBoard();
+            renderBoard()
             gameOver(activePlayer);
             return false;
         }
         if (checkTie() === true) {
-            board.getBoard();
-            console.log("Is a Tie!");
+            renderBoard();
+            gameOver("tie");
             return false;
         }
         changeActive();
@@ -158,7 +171,7 @@ function GameController() {
             console.log("Diag Guilty")
         };
         return isWinner;
-    }
+    };
 
     const checkTie = function () {
         let isATie = false;
@@ -166,15 +179,69 @@ function GameController() {
             isATie = true;
         }
         return isATie;
+    };
+
+    const gameOver = function (playerOrTie) {
+        if (playerOrTie === "tie") {
+            renderMessage(`It's a Tie!`);
+            removeBoardInteraction();
+            return false;
+        } else {
+            renderMessage(`Congratulations ${playerOrTie.name}, you win!`)
+            removeBoardInteraction();
+            return false;
+        }
+    };
+
+    // DOM Related EVENTS and DISPLAY
+    
+    const renderBoard = function () { 
+        while (boardContainer.firstChild) {
+            boardContainer.removeChild(boardContainer.firstChild);
+        };
+        for (let i = 0; i < 3; i++){
+            for (let j = 0; j < 3; j++){
+                const cell = document.createElement("button");
+                cell.textContent = board.getBoard()[i][j];
+                cell.id = `${i}${j}`
+                cell.addEventListener("click", () => {
+                  playRound(cell.id);
+                })
+                boardContainer.appendChild(cell);            
+            }
+        }
+    };
+
+    const renderNonInteractableBoard = function () {
+        while (boardContainer.firstChild) {
+            boardContainer.removeChild(boardContainer.firstChild);
+        };
+        for (let i = 0; i < 3; i++){
+            for (let j = 0; j < 3; j++){
+                const cell = document.createElement("button");
+                cell.textContent = board.getBoard()[i][j];
+                cell.id = `${i}${j}`
+                boardContainer.appendChild(cell);            
+            }
+        }
+        
     }
 
-    const gameOver = function (player) {
-        console.log(`Congratulations ${player.name}, you win!`)
+    const renderMessage = (message) => messageBoard.textContent = `${message}`;
+
+    startBtn.addEventListener("click", () => {
+        board.generateEmptyBoard();
+        startNewRound();
+        startBtn.textContent = "Restart"
+    })
+
+    const removeBoardInteraction = function () {
+        renderNonInteractableBoard();
+        boardContainer.classList.add("blur");
     }
 
-    // Initiate Game
-    startNewRound();
+    // CHANGE NAME INTERACTION
 
 };
 
-GameController();
+GameController()
